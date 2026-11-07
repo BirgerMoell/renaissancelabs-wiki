@@ -33,8 +33,16 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - About: about.md
   - Ideas: ideas/index.md
-  - Projects: projects/index.md
+  - Projects:
+      - projects/index.md
+      - Explainer films from code: projects/code-rendered-videos.md
+      - Swedish TTS intonation: projects/swedish-tts-intonation.md
+      - Skrivbench: projects/skrivbench.md
+      - How a frontier model is trained: projects/frontier-model-training.md
+      - GPU hardware limits: projects/gpu-hardware-limits.md
+      - RL rollouts with internet: projects/rl-rollouts-with-internet.md
   - Contributing: contributing.md
 
 exclude_docs: |
