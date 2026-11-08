@@ -37,6 +37,7 @@ nav:
   - Ideas:
       - ideas/index.md
       - Swedish Nemotron first model: ideas/swedish-nemotron-first-model.md
+      - Träna Nemotron på svenska: ideas/swedish-nemotron-first-model-sv.md
   - Projects:
       - projects/index.md
       - Explainer films from code: projects/code-rendered-videos.md

@@ -1,5 +1,7 @@
 # Training Nemotron 3.5 Lightning for Swedish
 
+*[Svenska versionen](swedish-nemotron-first-model-sv.md)*
+
 **Status:** proposal, open for comments
 **Authors:** Renaissance Labs
 
