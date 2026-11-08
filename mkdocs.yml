@@ -34,7 +34,9 @@ markdown_extensions:
 nav:
   - Home: index.md
   - About: about.md
-  - Ideas: ideas/index.md
+  - Ideas:
+      - ideas/index.md
+      - Swedish Nemotron first model: ideas/swedish-nemotron-first-model.md
   - Projects:
       - projects/index.md
       - Explainer films from code: projects/code-rendered-videos.md
