@@ -50,6 +50,7 @@ nav:
       - contributors/index.md
       - Validating RL environments: contributors/marianna13-rl-validation.md
       - Mid-training data: contributors/marianna13-midtraining-data.md
+      - The 8-pixel frog: contributors/nicolas-8-pixel-frog.md
   - Contributing: contributing.md
 
 exclude_docs: |
