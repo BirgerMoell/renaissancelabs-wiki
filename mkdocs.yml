@@ -49,6 +49,9 @@ nav:
   - Contributors:
       - contributors/index.md
       - The 8-pixel frog: contributors/nicolas-8-pixel-frog.md
+      - "Swedish reasoning SFT": contributors/swedish-reasoning-sft.md
+      - Small-model RL experiments on a laptop: contributors/small-model-rl-experiments.md
+      - Verifiable Swedish RL environments and baselines: contributors/swedish-rl-environment-baselines.md
   - External resources:
       - external/index.md
       - Validating RL environments: external/marianna13-rl-validation.md
