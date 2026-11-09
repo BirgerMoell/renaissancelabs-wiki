@@ -49,7 +49,7 @@ nav:
   - Contributors:
       - contributors/index.md
       - The 8-pixel frog: contributors/nicolas-8-pixel-frog.md
-  - From elsewhere:
+  - External resources:
       - external/index.md
       - Validating RL environments: external/marianna13-rl-validation.md
       - Mid-training data: external/marianna13-midtraining-data.md
