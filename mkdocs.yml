@@ -49,6 +49,7 @@ nav:
   - Contributors:
       - contributors/index.md
       - Validating RL environments: contributors/marianna13-rl-validation.md
+      - Mid-training data: contributors/marianna13-midtraining-data.md
   - Contributing: contributing.md
 
 exclude_docs: |
