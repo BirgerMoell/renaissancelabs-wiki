@@ -1,7 +1,7 @@
 # Validating RL environments (by Marianna13)
 
 !!! note "External resource, not from Renaissance Labs"
-    This is something we found online that could be helpful. It was made by **Marianna13** and published under the LAION organisation on Hugging Face. Renaissance Labs did not make it, and the protocol and datasets are not ours. We list it because it is useful to people building RL environments. Questions and corrections go to the original author.
+    This is an external resource that Renaissance Labs considers relevant to its work. It was made by **Marianna13** and published under the LAION organisation on Hugging Face. Renaissance Labs did not make it, and the protocol and datasets are not ours. It is listed because it is relevant to those building RL environments. Questions and corrections go to the original author.
 
 **Author:** Marianna13 (individual contributor)
 **Protocol:** [Agentic RL dataset validation protocol](https://gist.github.com/marianna13/f9bc94d2ecb39c302c6c9b540ea6100a)

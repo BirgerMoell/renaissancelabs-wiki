@@ -1,7 +1,7 @@
 # Mid-training data and context extension (by Marianna13)
 
 !!! note "External resource, not from Renaissance Labs"
-    This is something we found online that could be helpful. It summarises a working document by **Marianna13** from her [prelude-posttrain](https://github.com/marianna13/prelude-posttrain) repository. Renaissance Labs did not make it. The figures are hers, taken from the document as it stood at its last update (23 October 2026), and we have not reproduced them. Corrections go to the original author.
+    This is an external resource that Renaissance Labs considers relevant to its work. It summarises a working document by **Marianna13** from her [prelude-posttrain](https://github.com/marianna13/prelude-posttrain) repository. Renaissance Labs did not make it. The figures are hers, taken from the document as it stood at its last update (23 October 2026), and we have not reproduced them. Corrections go to the original author.
 
 **Author:** Marianna13 (individual contributor)
 **Source:** [issue-0054-midtraining-data.md](https://github.com/marianna13/prelude-posttrain/blob/main/docs/issue-0054-midtraining-data.md)
