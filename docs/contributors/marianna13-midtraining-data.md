@@ -11,17 +11,17 @@ The goal is a reproducible, decontaminated mid-training mixture for the OpenEuro
 
 ## Data sources
 
-Five core collections, each pinned to an exact Hugging Face revision, make up about 1 TiB of data and 825 billion tokens before filtering.
+Five core collections on Hugging Face, each pinned to an exact revision in the source, make up about 1 TiB of data and 825 billion tokens before filtering.
 
 | Collection | Contents | Tokens (seen) |
 |---|---|---:|
-| Nemotron-Cascade-2-SFT-Data | Math, science, software-engineering agent, conversational agent, chat, instruction following | 126B |
-| Nemotron-Pretraining-Specialized-v1 | Reasoning, question answering, STEM, textbooks, scientific coding | 297B |
-| UltraData-Stack-v3-L2 | Code files in 11 languages with quality scores | 230B |
-| stack-v3-train | Repository-level code | 165B |
-| Nemotron-Terminal-Corpus | Terminal-agent conversations | 7B |
+| [Nemotron-Cascade-2-SFT-Data](https://huggingface.co/datasets/nvidia/Nemotron-Cascade-2-SFT-Data) | Math, science, software-engineering agent, conversational agent, chat, instruction following | 126B |
+| [Nemotron-Pretraining-Specialized-v1](https://huggingface.co/datasets/nvidia/Nemotron-Pretraining-Specialized-v1) | Reasoning, question answering, STEM, textbooks, scientific coding | 297B |
+| [UltraData-Stack-v3-L2](https://huggingface.co/datasets/openbmb/UltraData-Stack-v3-L2) | Code files in 11 languages with quality scores | 230B |
+| [stack-v3-train](https://huggingface.co/datasets/HuggingFaceCode/stack-v3-train) | Repository-level code | 165B |
+| [Nemotron-Terminal-Corpus](https://huggingface.co/datasets/nvidia/Nemotron-Terminal-Corpus) | Terminal-agent conversations | 7B |
 
-A bounded proxy for general-text replay (DCLM, Nemotron-CC, and FinePDFs in English and 23 other EU languages) is added to limit forgetting, plus a separate set of very long PDF documents (at least 32K tokens) for the long-context stages. Some components were excluded on purpose: the Wiki Rewrite subset, the agent subset that duplicates the terminal corpus, and a local code aggregate with unclear file-level provenance.
+A bounded proxy for general-text replay ([DCLM](https://huggingface.co/datasets/mlfoundations/dclm-baseline-1.0), Nemotron-CC, and [FinePDFs](https://huggingface.co/datasets/HuggingFaceFW/finepdfs) in English and 23 other EU languages) is added to limit forgetting, plus a separate set of very long PDF documents (at least 32K tokens) for the long-context stages. Some components were excluded on purpose: the Wiki Rewrite subset, the agent subset that duplicates the terminal corpus, and a local code aggregate with unclear file-level provenance.
 
 **Code selection.** Repositories need at least 8,192 tokens, a match in the quality-scored set, and at least 20% scored files, and are ranked by density and quality. The author chose to include both permissively licensed and unlicensed ("no_license") code, which gives 128,122 repositories and 5.9B tokens, against 3,439 repositories and 0.26B tokens for permissive-only. This is a licensing decision that others may want to make differently.
 
