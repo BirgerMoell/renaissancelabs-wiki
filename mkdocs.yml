@@ -46,6 +46,9 @@ nav:
       - How a frontier model is trained: projects/frontier-model-training.md
       - GPU hardware limits: projects/gpu-hardware-limits.md
       - RL rollouts with internet: projects/rl-rollouts-with-internet.md
+  - Contributors:
+      - contributors/index.md
+      - Validating RL environments: contributors/marianna13-rl-validation.md
   - Contributing: contributing.md
 
 exclude_docs: |
