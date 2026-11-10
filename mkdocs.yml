@@ -55,7 +55,7 @@ nav:
   - External resources:
       - external/index.md
       - Validating RL environments: external/marianna13-rl-validation.md
-      - Mid-training data: external/marianna13-midtraining-data.md
+      - Mid-training and SFT data: external/marianna13-midtraining-data.md
   - Contributing: contributing.md
 
 exclude_docs: |
