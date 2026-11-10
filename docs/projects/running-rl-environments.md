@@ -185,9 +185,29 @@ The launcher **fails closed**: if any protection cannot be applied, it exits wit
 ### What the sandbox costs, and how to pay for it
 
 - **`pip install` stops working**, because the network is gone. Two of our first twelve tasks failed for this reason. The fix is an offline wheelhouse: the dataset lists the exact wheels its tasks need, we downloaded the x86_64 builds of the same versions, mounted the folder read-only and pointed `pip` at it (`PIP_NO_INDEX=1`, `PIP_FIND_LINKS=...`). All twelve then passed.
-- **Loopback is blocked too.** Landlock's TCP rules are per port, not per address, so "loopback only" cannot be expressed. Tasks that start a local web server will fail. A private network namespace would solve this properly, but our cluster does not allow unprivileged users to create one.
+- **Loopback is blocked too.** Landlock's TCP rules are per port, not per address, so "loopback only" cannot be expressed. Tasks that start a local web server will fail. A private network namespace would solve this properly, but our cluster does not allow unprivileged users to create one. The next section covers the two narrow exceptions we added.
 - **A later command cannot signal an earlier one.** Each command is its own Landlock domain, so `pkill` on a process started by a previous command is refused.
 - **Harness steps are not wrapped.** File upload and download, and a dataset's own pre-agent setup script, still run unsandboxed. They are trusted code, but know that they are outside the fence.
+
+### Opening one thing at a time
+
+Strict by default does not mean strict forever. When we looked at the 25 tasks that failed because of the network block, only 3 needed the internet. 22 were local diagnostics (`ping 127.0.0.1`, `ip addr`, `traceroute`). So we added two narrow profiles, both off unless the job asks for them, and switched on from the host side, never from anything the model can set.
+
+| Profile | What it allows | How |
+|---|---|---|
+| `icmp` | ICMP echo sockets and read-only network-interface queries (`ip addr`, `ip route`) | seccomp admits only those socket types; UDP, raw, IPv6 and TCP stay denied |
+| `proxy` | HTTPS and HTTP to a short list of domains | Landlock allows TCP connect to one local port only; a proxy on the host forwards to an allow-list, refuses IP addresses, private ranges and ports other than 80 and 443, and logs every decision |
+
+Three things we learned building them:
+
+- **The real `ping` needs more than ICMP.** It also opens an IPv6 socket and a UDP socket to choose a source address. We do not allow UDP, because Landlock cannot limit where UDP goes, so the real tool fails. We ship a small replacement that sends real echo requests but refuses any target outside `127.0.0.0/8`. It prints iputils-style output but is not the same program, and you should say so wherever you report results.
+- **A login shell resets `PATH`**, so putting the replacement first on `PATH` did nothing. A symlink in `/usr/local/bin`, which comes first in the default login `PATH`, worked.
+- **Settings must reach the worker before it starts.** We exported the proxy port after starting the worker, and the first run silently used the strict profile.
+
+What these profiles do not stop:
+
+- Model-written code can still send ICMP echoes to outside hosts. That is a very slow covert channel, and seccomp cannot check destinations.
+- Landlock filters by port, not address, so the same port number on an outside server is reachable. A random high port per job makes this unlikely, not impossible.
 
 ### Where Monty fits
 
@@ -236,6 +256,25 @@ Four tasks per dataset is a smoke test, not a validation. It shows which dataset
 | Sandbox, no wheelhouse | 10/12 | 12/12 |
 | Sandbox plus offline wheelhouse | 12/12 | 12/12 |
 
+### Full Endless Terminals validation (1,000 tasks, sandbox on)
+
+Images rebuilt on x86_64 (993 built, 4 reused, 3 failed; no registry rate-limit errors this time, using a public mirror for the base image). Oracle and no-op agents, 2h34m on one CPU node.
+
+| Lane (the dataset's own label) | Tasks | Oracle passed | No-op rejected | Passed both |
+|---|---|---|---|---|
+| Strict isolation | 975 | 958 | 974 | 958 |
+| Host network | 22 | 4 | 22 | 4 |
+| Proxy (TCP) | 3 | 0 | 3 | 0 |
+
+The 25 network-lane tasks were expected to fail under a blanket network block. Rerunning them with the matching narrow profile:
+
+| Lane | Profile | Oracle passed | No-op rejected |
+|---|---|---|---|
+| Host network | `icmp` | 17/22 | 22/22 |
+| Proxy (TCP) | `proxy` | 3/3 | 3/3 |
+
+Remaining misses in the host-network lane: three tasks need `traceroute` (not built), one checks the process name of `ping`, and one fails an unrelated float-versus-int check. No no-op run passed anywhere, which is the property that matters most. Both parts of this result were produced with scripted agents, not a model.
+
 ### First model rollout
 
 Nemotron 3.5 Lightning (30B, served with vLLM on one GPU), Terminus-2, 30-turn cap, sandbox and wheelhouse on, twelve Endless Terminals tasks. The run took under seven minutes.
@@ -259,12 +298,13 @@ Each of these cost time. They are listed so you can check for them first.
 | Reference solution fails a file-permission check | Cluster default `umask` is 0002; tasks assume Docker's 022 | `umask 022` before starting the worker |
 | "0 tasks found" | The task scanner does not follow symbolic links | Copy task folders instead of linking them |
 | Dataset download stops with HTTP 429 | Anonymous Hugging Face rate limit on datasets with thousands of small files | Retry (downloads resume), or authenticate |
-| Hundreds of builds fail with `TOOMANYREQUESTS` | Every build asks Docker Hub for the base image manifest; the anonymous limit is about 100 pulls per six hours | Pull the base image through a public mirror, or build it once to a local file. In a four-task test the mirror route got past the limit; it is not yet tried at full scale |
+| Hundreds of builds fail with `TOOMANYREQUESTS` | Every build asks Docker Hub for the base image manifest; the anonymous limit is about 100 pulls per six hours | Pull the base image through a public mirror, or build it once to a local file. The mirror route got through 1,000 builds with no rate-limit errors |
 | One build hangs for many minutes inside `apt-get install` | A stalled connection to the distribution's package mirror; every task image runs its own `apt-get` | Keep a build timeout, retry, and limit parallel builds. A shared base image with the common packages would avoid most of these downloads |
 | A handful of builds fail at the very start with a JSON error | Many parallel builds race on Apptainer's shared download cache | Warm the cache with one build before starting the rest |
 | `fakeroot` fails inside the image | The host's `fakeroot` binary needs a newer C library than an old base image has | Not solved yet |
 | Graders fail with "No interpreter found for Python 3.13" | The grader expects a pre-downloaded Python and package mirror that is not redistributed | Build that mirror, as the dataset card describes |
 | Agent cannot start: "tmux: command not found" | The image build installs tmux on a best-effort basis and it silently failed | Check for tmux after building; treat its absence as a build failure |
+| Real `ping` fails in the sandbox even with ICMP allowed | It also opens IPv6 and UDP sockets | Loopback-only replacement; see "Opening one thing at a time" |
 | Home directory over quota | Tools cache into `$HOME` by default | Point every cache at project storage |
 
 ## Checklist before a model writes its first command
@@ -283,7 +323,8 @@ Each of these cost time. They are listed so you can check for them first.
 
 - Everything here is from one day of work on one cluster. Other clusters differ in what they mount, whether compute nodes reach the internet, and which namespaces users may create.
 - Only Endless Terminals has been run with the sandbox on. The other datasets have only the four-task smoke test without it.
-- The full 1,000-task validation has not completed; the first attempt was stopped by the Docker Hub rate limit.
+- The 1,000-task validation used scripted agents. No model has run on more than twelve tasks, and none has run under the `icmp` or `proxy` profiles.
+- We have not looked into the roughly 17 strict-lane oracle misses beyond counting them.
 - The sandbox launcher and the hook into the runner are local changes. They are not published, and nobody outside the project has reviewed them.
 - We have not read the model's trajectories in detail, so we cannot yet say how often the sandbox restrictions cost it turns.
 - The datasets, the protocol and the Harbor fork are other people's work; see [the external resource page](../external/marianna13-rl-validation.md).
